@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-restore
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: gcs-credentials
+          secret:
+            secretName: gcs-credentials
+      containers:
+        - name: 'mongodb-backup'
+          image: 'dalaba58/backupmongodb-projet6'
+          command:
+            - '/bin/sh'
+            - '-c'
+            - |
+              echo "Atuhentification sur GCS..."
+              gcloud auth activate-service-account --key-file=/etc/gcs-credentials/service-account.json
+              echo "Téléchargement du dump"
+              gsutil cp -r gs://mongodb-backup-dalaba/dump.gz /tmp/dump.gz
+              echo "Décompression du dump"
+              gunzip /tmp/dump.gz
+              echo "Restauration de la base de données"
+              mongorestore --drop --uri="mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}" --archive="/tmp/dump"
+              echo "Base de données restaurée"
+
+          volumeMounts:
+            - name: gcs-credentials
+              mountPath: /etc/gcs-credentials
+          env:
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: mongodb-root-password
+            - name: MONGODB_HOST
+              value: mongodb-0.mongodb-headless.default
+            - name: MONGODB_USER
+              value: root

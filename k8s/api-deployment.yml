@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+  labels:
+    app.kubernetes.io/name: api
+    app.kubernetes.io/component: server
+    app.kubernetes.io/part-of: auth-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: api
+      app.kubernetes.io/component: server
+      app.kubernetes.io/part-of: auth-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: api
+        app.kubernetes.io/component: server
+        app.kubernetes.io/part-of: auth-app
+    spec:
+      containers:
+        - name: api
+          image: dalaba58/projet5-k8s-node-api
+          ports:
+            - containerPort: 80
+          env:
+            - name: JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: public_key.pem
+            - name: JWT_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: private_key.pem
+            - name: MONGODB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb
+                  key: mongodb-root-password
+            - name: MONGODB_HOST
+              value: mongodb-headless:27017
+            - name: MONGODB_USER
+              value: root
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+          livenessProbe:
+            httpGet:
+              path: /api/user/current
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/user/current
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      imagePullSecrets:
+        - name: docker-hub-secret
