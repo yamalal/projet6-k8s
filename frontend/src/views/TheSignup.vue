@@ -14,7 +14,7 @@ const validationSchema = toFormValidator(z.object({
     password: z.string({ required_error: 'Vous devez renseigner ce champ' }).min(5, 'Le mot de passe doit faire au moins 5 caractères'),
 }));
 
-const { handleSubmit, setErrors } = useForm({
+const { handleSubmit } = useForm({
     validationSchema
 });
 

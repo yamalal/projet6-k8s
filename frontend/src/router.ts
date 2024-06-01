@@ -7,26 +7,26 @@ export const router = createRouter({
   routes: [
     {
       path: '/',
-      component: () => import('@/views/Home.vue'),
+      component: () => import('@/views/TheHome.vue'),
     },
     {
       path: '/connexion',
       beforeEnter: [isNotAuthenticatedGuard],
-      component: () => import('@/views/Login.vue'),
+      component: () => import('@/views/TheLogin.vue'),
     },
     {
       path: '/inscription',
       beforeEnter: [isNotAuthenticatedGuard],
-      component: () => import('@/views/Signup.vue'),
+      component: () => import('@/views/TheSignup.vue'),
     },
     {
       path: '/profil',
       beforeEnter: [isAuthenticatedGuard],
-      component: () => import('@/views/Profile.vue'),
+      component: () => import('@/views/TheProfile.vue'),
     },
     {
       path: '/:notfound(.*)*',
-      component: () => import('@/views/NotFound.vue'),
+      component: () => import('@/views/TheNotFound.vue'),
     },
   ],
 });
